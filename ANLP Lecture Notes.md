@@ -1527,8 +1527,6 @@ There are different ways to calculate the relevance score between decoder state 
 - Attention is **modality-agnostic**. It works for any sequence-to-sequence task.
 - **Example - Image Captioning:** The model attends to specific pixels or patches of an image while generating the corresponding word in the caption (e.g., focusing on a frisbee when generating the word "frisbee").
 
-<<<Here/>>>
-
 ## W602 - Self-Attention in Transformers
 
 ### Context and Motivation
