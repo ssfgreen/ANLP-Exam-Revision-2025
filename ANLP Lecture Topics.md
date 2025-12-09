@@ -23,8 +23,6 @@
 - **Tokenisation:** Challenges (compounds, subwords) and task structure.
 - **Byte-Pair Encoding (BPE) Algorithm:** Steps, simulation by hand, pros/cons.
 
----
-
 ## Week 2: Probability & N-Grams
 
 ### W201 - Probability, Models, and Data
@@ -44,8 +42,6 @@
 - **Add-One / Add-Alpha Smoothing:** Formula, application, strengths/weaknesses.
 - **Sampling:** Random generation from distributions (concept introduction).
 - **Training, Development, and Test Sets:** Purpose and proper usage.
-
----
 
 ## Week 3: Classification & Semantics
 
@@ -71,8 +67,6 @@
 - **Distributional Hypothesis:** Concept ("words in similar contexts have similar meanings").
 - **Resources:** WordNet (lexical database).
 
----
-
 ## Week 4: Embeddings & Neural Networks
 
 ### W401 - Dense Word Embeddings
@@ -96,8 +90,6 @@
 - **Cross-entropy Loss:** Applied to Neural Networks.
 - **L2 Regularization:** Weight decay in Neural Networks.
 
----
-
 ## Week 5: RNNs & Ethics
 
 ### W501 - RNNs
@@ -119,8 +111,6 @@
 - **Legal and Ethical Issues:** Privacy, consent, copyright in data collection.
 - **Corpora:** Collection and annotation ethics.
 
----
-
 ## Week 6: Attention & Transformers
 
 ### W601 - Attention in Seq2Seq
@@ -138,8 +128,6 @@
 
 - **Transformer Components:** Feedforward, residuals, LayerNorm.
 - **Positional Encodings:** Learned vs. Sinusoidal, Absolute vs. Relative.
-
----
 
 ## Week 7: Architectures & Transfer Learning
 
@@ -165,8 +153,6 @@
 - **Causal Language Modelling:** Pre-training objective.
 - **Denoising Language Modelling:** Pre-training objective.
 
----
-
 ## Week 8: Scaling & Efficiency
 
 ### W801 - In-Context Learning
@@ -186,8 +172,6 @@
 
 - **LLM Inference Phases:** Initial KV Cache Creation (Prefilling) vs. Auto-regressive Generation (Decoding).
 - **Sparse Attention:** (Concept implicit in efficiency discussions).
-
----
 
 ## Week 9: Advanced Topics
 
