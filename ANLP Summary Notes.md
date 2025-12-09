@@ -375,12 +375,16 @@
 
 - Learn representations by **pulling together positives** and **pushing apart negatives** in embedding space.
 
-**Generic InfoNCE-style loss**
+**Positive pair:**
 
-- $$
-  L = -\log \frac{\exp(\text{sim}(x,x^+)/\tau)}
-    {\exp(\text{sim}(x,x^+)/\tau) + \sum_{neg}\exp(\text{sim}(x,x^-)/\tau)}
-  $$
+$P(+ \mid w_t, w_k) = \sigma\!\big(v(w_t) \cdot c(w_k)\big)$
+
+*Loss*
+
+### **Loss for One Target–Context Pair**
+
+$$L = -\log \sigma\!\big(v(w_t) \cdot c(w_k)\big) - \sum_{i=1}^{K} \log \sigma\!\big(-\,v(w_t) \cdot c(w_i^-)\big)$$
+
 
 **Pros / Cons (1 each)**
 
