@@ -153,6 +153,7 @@ L = -\log \sigma(v_t\cdot c_{+}) - \sum_{i=1}^K \log \sigma(-v_t\cdot c_i^{-})
 $$
 
 This is exactly the **Skip-Gram with Negative Sampling (SGNS)** objective.
+Also, knows as **Noise Contrastive Estimation (NCE)**.
 
 ## **Evaluation Metrics for Retrieval**
 
