@@ -529,7 +529,7 @@ $$L = -\log \sigma\!\big(v(w_t) \cdot c(w_k)\big) - \sum_{i=1}^{K} \log \sigma\!
 
 ### **Accuracy**
 
-- $$\text{acc} = \frac{\text{# correct}}{\text{# total}}$$
+- $$\text{acc} = \frac{\text{num correct}}{\text{total predictions}}$$
 - **Appropriate:** balanced classification tasks, e.g. topic classification.
 - **Limitations:** hides performance on rare classes.
 - **+** Simple, intuitive.
