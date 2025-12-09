@@ -283,6 +283,20 @@ $$F_1 = 2 \cdot \frac{PR}{P + R}$$
 - **Imbalanced classes** (many negatives, few positives).
 - **Token-level structure prediction** where TP/FP/FN matter more than TN.
 
+### **Macro vs Micro Averaging**
+
+- **Macro averaging:** average the metric across classes/examples.
+- **Micro averaging:** sum the metric across classes/examples and divide by the total number of classes/examples.
+
+Normal _F1-Score_ is micro averaging.
+
+Macro-averaging is $F1_{macro} = \frac{F1_1 + F1_2 + ... + F1_n}{n}$
+
+**When to use:**
+
+- **Macro averaging:** when the classes are unbalanced.
+- **Micro averaging:** when the classes are balanced.
+
 ---
 
 # **4. Metrics for Generative Tasks**
