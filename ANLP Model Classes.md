@@ -1,378 +1,454 @@
-# **1. Single-Label Text Classification (Logistic / Softmax Regression)**
+# **1. Single-Label Text Classification**
+
+_(Logistic Regression, Softmax Regression, Linear Classifiers, BERT Fine-Tuning)_
+
+---
 
 ## **Data Shape**
 
-- Input: **vector** or **embedding** representation of document/sentence
-- Output: **single class label**
-- Label distribution: **one-hot**.
+- Input: **fixed-size vector** (from TF-IDF, averaged embeddings, or CLS embedding).
+- Output: **one label** from K classes → **mutual exclusivity enforced**.
+- Target: **one-hot vector**.
 
-## **Objective Function (Softmax Cross-Entropy)**
+---
 
-For class logits (z):
+## **Objective: Softmax Cross-Entropy**
+
+Softmax converts logits to a probability distribution:
 
 $$
 \hat{y}_i = \frac{e^{z_i}}{\sum_j e^{z_j}}
 $$
 
-Cross-entropy (one-hot) ():
+Loss for gold class:
 
 $$
 L = -\log \hat{y}_{\text{gold}}
 $$
 
-Equivalent to **negative log-likelihood**.
+Equivalent to **maximum likelihood** under a categorical distribution.
+
+---
 
 ## **Evaluation Metrics**
 
-- **Accuracy** (balanced classes) ()
+**Accuracy:** best when label distribution is balanced.
 
 $$
-\text{acc} = \frac{\text{correct predictions}}{N}
+\text{acc}=\frac{\text{correct}}{N}
 $$
 
-- **Precision, Recall, F1** (class imbalance) ():
+**Precision / Recall / F1:** needed when classes differ in frequency.
 
 $$
-P=\frac{TP}{TP+FP},\qquad
-R=\frac{TP}{TP+FN},\qquad
+P=\frac{TP}{TP+FP},\ R=\frac{TP}{TP+FN},\
 F_1=\frac{2PR}{P+R}
 $$
 
-Micro/macro averaging definitions ().
+**Micro vs Macro**
+
+- **Micro** = treats all predictions equally → sensitive to majority class.
+- **Macro** = averages class-wise → detects poor minority-class performance.
+
+---
 
 ## **Pros**
 
-- Convex optimisation → unique optimum.
-- Interpretable parameters.
-- Strong baseline for many ANLP tasks.
+- **Convex** → guaranteed global optimum.
+- Strong, interpretable **baseline** for many tasks.
+- Works well with **sparse features** (n-grams).
 
 ## **Cons**
 
-- Linear decision boundaries.
-- Weak on long-range/contextual semantics.
+- Only **linear** decision boundaries.
+- Cannot capture **order**, **syntax**, or long-range dependencies.
 
-## **Where used in ANLP**
+---
 
-- Sentiment classification
+## **Where used**
+
+- Sentiment analysis
 - Topic classification
 - POS tagging baselines
+- Any “bag-of-words → label” task
+
+---
 
 # **2. Multi-Label Text Classification**
 
+_(Multi-topic news labels, toxicity categories, emotion tagging)_
+
+### **Example Models**
+
+- **TF-IDF + One-vs-Rest Logistic Regression**
+- **CNN/RNN classifiers with sigmoid output**
+- **BERT sigmoid multi-label head**
+
+---
+
 ## **Data Shape**
 
-- Input: single text →
-- Output: **vector of labels** (y_1,\dots,y_K), each (0/1).
-- Classes **not mutually exclusive**.
+- Output: vector **[y₁,…,y_K]**, each ∈ {0,1}.
+- **Multiple labels can be active** at once.
+- No mutual exclusion → different objective.
 
-## **Objective Function (Sigmoid + Binary Cross-Entropy)**
+---
 
-For each label (k):
-
-$$
-\hat{y}_k=\sigma(z_k)=\frac{1}{1+e^{-z_k}}
-$$
+## **Objective: Sigmoid + Binary Cross-Entropy**
 
 $$
-L = -\sum_{k=1}^K \left[y_k \log \hat{y}_k + (1-y_k)\log(1-\hat{y}_k)\right]
+\hat{y}_k = \sigma(z_k)
 $$
 
-Why not softmax? → classes are **independent**, not exclusive.
+$$
+L = -\sum\_{k=1}^K \big[y_k \log \hat{y}_k + (1-y_k)\log(1-\hat{y}_k)\big]
+$$
 
-## **Evaluation Metrics**
+Each label is an **independent binary classification task**.
 
-- **Micro-F1**: recommended for multi-label.
-- **Macro-F1**: class-balanced view.
+---
 
-Formulas same as above, applied per-label then aggregated.
+## **Evaluation**
+
+- **Micro-F1**: handles label imbalance well.
+- **Macro-F1**: penalises poor minority-label performance.
+
+Multi-label F1 is computed **after thresholding** probabilities (commonly 0.5, but tuned).
+
+---
 
 ## **Pros**
 
-- Handles overlapping categories.
-- Sigmoid outputs = calibrated per-label probabilities.
+- Handles overlapping, correlated topics.
+- Produces **per-label confidence scores**.
 
 ## **Cons**
 
-- Predicting many rare labels is difficult.
-- Thresholding (0.5?) strongly affects precision/recall.
+- Choosing a threshold strongly affects metrics.
+- Many rare-label datasets suffer from **sparsity**.
 
-# **3. Retrieval / Similarity Models (Vector Space + SGNS-Style Objective)**
+---
 
-## **Data Shape**
+# **3. Retrieval / Similarity Models**
 
-- Query vector (q), document vector (d)
-- Possibly many **negative documents** per query
-- Goal: increase **similarity(q, d⁺)** over **similarity(q, d⁻)**
+_(Information retrieval, semantic search, embeddings, word vectors)_
+
+### **Example Models**
+
+- **Word2Vec Skip-Gram with Negative Sampling (SGNS)**
+- **Doc2Vec**
+- **Sentence-BERT**
+- **Dense Passage Retrieval (DPR)**
+
+---
 
 ## **Similarity Measures**
 
-### **Dot product**
+**Dot product:** captures **overlap + magnitude**.
 
 $$
 u \cdot v = \sum_i u_i v_i
 $$
 
-### **Cosine similarity** (direction only)
+**Cosine similarity:** magnitude-invariant → compares **direction**.
 
 $$
 \cos(u,v)=\frac{u\cdot v}{|u||v|}
 $$
 
-### **Euclidean distance** ()
+**Euclidean distance:** geometric distance.
 
 $$
-d(u,v)=\sqrt{(u_1-v_1)^2+\cdots}
+d(u,v)=\sqrt{\sum_i (u_i-v_i)^2}
 $$
 
-## **Objective Function: SGNS-Style Binary Classification**
+---
 
-Replacing full softmax with **binary logistic classification**:
+## **SGNS Objective: Binary Classification Over Pairs**
 
-### **Positive Pair Probability**
-
-For target word/document (w_t) and real context/query (w_k):
+### **Positive pair probability**
 
 $$
-P(+|w_t,w_k)=\sigma\left( v(w_t)\cdot c(w_k) \right)
+P(+|w_t,w_k)=\sigma\left(v(w_t)\cdot c(w_k)\right)
 $$
 
-**Interpretation:** “How likely is (w*k) to be a \_real* context word for (w_t)?”
-
-### **Negative Samples**
-
-Sample (K) noise words (w_i^{-}):
+### **Negative samples**
 
 $$
-P(-|w_t,w_i^{-})=\sigma\left( - v(w_t)\cdot c(w_i^{-}) \right)
+P(-|w_t,w_i^-)=\sigma\left(-,v(w_t)\cdot c(w_i^-)\right)
 $$
 
-### **Objective**
+### **Loss**
 
 $$
 L = -\log \sigma(v_t\cdot c_{+}) - \sum_{i=1}^K \log \sigma(-v_t\cdot c_i^{-})
 $$
 
-This is exactly the **Skip-Gram with Negative Sampling (SGNS)** objective.
-Also, knows as **Noise Contrastive Estimation (NCE)**.
+Interpretation:
+**Increase (t, positive) similarity, decrease (t, negative) similarity.**
 
-## **Evaluation Metrics for Retrieval**
+---
 
-From Tutorial 4 ():
+## **Evaluation**
 
-**Precision@1**:
+- **Precision@1 / Recall@k** for ranking tasks.
+- For embeddings: **cosine similarity quality**, clustering coherence, intrinsic tests.
 
-$$
-P@1=\frac{\text{num correct top-1 retrieved docs}}{N}
-$$
-
-Useful because only one gold document per query.
-
-If no gold labels → evaluate with **intrinsic similarity** or **LLM-as-judge**.
+---
 
 ## **Pros**
 
-- Efficient training (no full softmax).
-- Works well with large corpora.
-- Creates high-quality embeddings.
+- Very efficient compared to full softmax.
+- Learns high-quality **semantic embeddings**.
 
 ## **Cons**
 
-- Sensitive to negative sampling distribution.
-- Scores are **not calibrated probabilities**.
+- Sensitive to the sampling distribution.
+- Embedding norms + anisotropy issues without normalisation.
 
-# **4. Language Modelling (Generative Pretraining)**
+---
 
-## **Data Shape**
+# **4. Language Modelling (Generative Models)**
 
-- Input: sequence of tokens (w_1,\dots,w_T)
-- Output: model predicts next token (w_t)
+_(N-gram LMs, RNN LMs, GPT-style Transformers)_
 
-## **Objective Function: Token-Level Cross-Entropy**
+### **Example Models**
 
-For each position (t):
+- **n-gram language models** with smoothing
+- **LSTM / GRU LMs**
+- **GPT-2 / GPT-3 / LLaMA**
+
+---
+
+## **Objective: Next-Token Cross-Entropy**
 
 $$
-L = -\sum_t \log P(w_t | w_{<t})
+L = -\sum_t \log P(w_t \mid w_{<t})
 $$
 
-One-hot form appears in merged notes ():
+This is **MLE** under an autoregressive factorisation of the sequence.
+
+One-hot view:
 
 $$
-L=-\log q(\text{gold token})
+L = -\log q(\text{gold token})
 $$
 
-## **Perplexity** ()
+---
+
+## **Perplexity**
 
 $$
 PP = 2^{H_M}
 $$
 
-Lower is better.
+Lower PP → better model fit to distribution.
+
+---
 
 ## **Pros**
 
-- Foundation for generative LLMs.
-- Captures distributional semantics.
+- Captures sequential structure.
+- Forms basis of **all modern LLMs**.
 
 ## **Cons**
 
-- Perplexity ≠ downstream quality.
-- Predictive objective may misalign with summarisation/QA tasks.
+- Perplexity may not correlate with generation quality.
+- Predict-next-token objective doesn’t naturally align with tasks like summarisation.
 
-# **5. Masked Language Modelling (BERT-style)**
+---
 
-## **Data Shape**
+# **5. Masked Language Modelling (BERT)**
 
-- Input sentence with **15% masked tokens**.
-- Output: predict masked tokens.
+_(BERT, RoBERTa, XLM-R — bidirectional encoders)_
+
+### **Example Models**
+
+- **BERT-base**
+- **RoBERTa** (no NSP, dynamic masking)
+- **DeBERTa**
+
+---
 
 ## **Objective**
 
-Same as CE above:
+Predict masked tokens (≈15%):
 
 $$
 L = -\sum_{\text{masked } t} \log P(w_t | x_{\text{masked}})
 $$
 
+This teaches **deep bidirectional contextual understanding**.
+
+---
+
+## **Evaluation**
+
+- Masked-token accuracy
+- Cross-entropy on masked positions
+
+---
+
+## **Pros**
+
+- Extremely strong for **classification**, **NER**, **QA (extractive)**.
+- Learns rich **contextual** representations.
+
+## **Cons**
+
+- Not generative.
+- Masking is artificial; may mismatch natural text.
+
+---
+
+# **6. Sequence-to-Sequence (Seq2Seq)**
+
+_(MT, summarisation, dialogue, data-to-text)_
+
+### **Example Models**
+
+- **RNN Encoder–Decoder** with Bahdanau or Luong attention
+- **Transformer encoder–decoder** (T5, BART, mBART)
+- **Classic NMT systems**
+
+---
+
+## **Objective**
+
+$$
+L = -\sum_t \log P(y_t \mid y_{<t}, x)
+$$
+
+Decoder is autoregressive over output tokens.
+
+---
+
+## **Teacher Forcing**
+
+During training:
+
+- Decoder receives **gold previous token** rather than its own prediction.
+- **Exposure bias:** at inference, model receives its own disturbed outputs, causing drift.
+
+---
+
 ## **Evaluation Metrics**
 
-- **Accuracy** on masked tokens
-- **Cross-entropy**
+- **BLEU** (n-gram precision + brevity penalty)
+- **ROUGE-N / ROUGE-L** (recall, LCS)
+- **METEOR**, **BERTScore**, **chrF** (semantic/character-level)
+
+---
 
 ## **Pros**
 
-- Produces **bidirectional** contextual embeddings.
-- Strong for classification, NER, QA.
+- Captures input → output conditional structure.
+- Excellent for MT and summarisation.
 
 ## **Cons**
 
-- Not generative (cannot directly sample text).
-- Requires special masking corruption scheme.
+- N-gram metrics ignore meaning.
+- Exposure bias unless mitigated (scheduled sampling, etc.).
 
-# **6. Sequence-to-Sequence Models (MT, Summarisation)**
+---
 
-## **Data Shape**
+# **7. LLM-as-a-Judge + Elo / Win Rate**
 
-- Encoder input sequence
-- Decoder output sequence
-
-## **Objective Function**
-
-Token-level cross-entropy over decoder predictions:
+### **Win Rate**
 
 $$
-L = -\sum_t \log P(y_t | y_{<t}, x)
+\text{WinRate}(A)=P(A \text{ beats } B)
 $$
 
-## **Teacher Forcing** ()
-
-- Use gold previous token during training
-- **Exposure bias:** model never sees own mistakes → errors cascade at inference.
-
-## **Evaluation Metrics (Generation)**
-
-### **BLEU** ()
-
-- Precision of n-grams (1–4)
-- Geometric mean × brevity penalty
-
-### **ROUGE-N, ROUGE-L** ()
-
-- Recall of n-grams
-- LCS for ROUGE-L
-
-### **METEOR, BERTScore, chrF**
-
-From merged notes ()
-
-## **Pros**
-
-- Strong for structured generation tasks.
-- Easy to align with token-level loss.
-
-## **Cons**
-
-- N-gram metrics reflect surface form, not meaning.
-- Exposure bias unless mitigated.
-
-# **7. LLM-as-a-Judge + Win Rate / Elo**
-
-### **Win Rate** ()
-
-$$
-\text{WinRate}(A) = P(A \text{ beats } B)
-$$
+Judge outputs preferences across many examples, yielding a probability.
 
 ### **Elo Ranking**
 
-Pairwise comparisons → global quality ranking.
+Repeated pairwise comparisons → estimate a **global latent quality score**.
+
+---
 
 ## **Pros**
 
-- Works for open-ended tasks (summaries, reasoning).
-- Cheap and scalable.
+- Works for open-ended tasks: summarisation, reasoning, QA.
+- Much cheaper than human annotation.
 
 ## **Cons**
 
-- Bias from judge models.
-- No absolute correctness notion.
+- Biased by judge model (style, verbosity, hallucination tolerance).
+- Produces **relative**, not absolute, correctness.
+
+---
 
 # **8. Regularisation & Optimisation**
 
-## **L2 Regularisation** ()
+## **L2 Regularisation (Weight Decay)**
 
 $$
 L' = L + \lambda \sum_j w_j^2
 $$
 
-## **SGD Update**
+Encourages **small weights**, reduces overfitting, smooths decision boundaries.
 
-For learning rate (\eta):
+---
+
+## **SGD Update**
 
 $$
 w \leftarrow w - \eta \frac{\partial L}{\partial w}
 $$
 
+Stochastic updates approximate the global optimum over time.
+
+---
+
 ## **Backpropagation**
 
-- Uses **chain rule** through all layers.
-- Core formula:
-  $$
-  \delta = \frac{\partial L}{\partial z}
-  $$
+Uses the **chain rule** to compute gradients layer-by-layer:
 
-# **TLDR (Exam-Fast Recall)**
+$$
+\delta = \frac{\partial L}{\partial z}
+$$
 
-### **Single-label classifier**
+Then propagate backward through weights and activations.
 
-- Objective: softmax CE
-- Metrics: accuracy, F1
-- Use when: mutually exclusive classes
+---
 
-### **Multi-label classifier**
+# **TLDR: Exam Flash Sheet**
 
-- Objective: sigmoid + BCE
-- Metrics: micro-F1
-- Use when: overlapping categories
+### **Single-Label**
 
-### **Retrieval / similarity**
+- **Softmax CE**, accuracy/F1
+- Mutually exclusive classes
 
-- SGNS objective (binary classification)
-- Similarity: cosine/dot
-- Metric: P@1
+### **Multi-Label**
 
-### **Language modelling**
+- **Sigmoid + BCE**, micro-F1
+- Independent labels
 
-- Objective: next-token CE
-- Metric: perplexity
-- Used for generative pretraining
+### **Retrieval**
+
+- SGNS objective
+- Cosine + dot product
+- P@1 for ranking
+
+### **Language Modelling**
+
+- Next-token CE
+- Perplexity
+- GPT, RNN LM, n-gram LM
+
+### **Masked LM**
+
+- Masked CE
+- Bidirectional; good for encoders
 
 ### **Seq2Seq**
 
-- Decoder CE, teacher forcing
-- BLEU/ROUGE for evaluation
+- Decoder CE
+- BLEU/ROUGE
+- Attention; exposure bias
 
-### **Transformers (BERT)**
+---
 
-- Masked LM CE
-- Good for classification
+If you want, I can also **compress this into a single-page exam cheat-sheet**, or **add worked examples** for any section.

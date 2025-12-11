@@ -379,12 +379,11 @@
 
 $P(+ \mid w_t, w_k) = \sigma\!\big(v(w_t) \cdot c(w_k)\big)$
 
-*Loss*
+_Loss_
 
 ### **Loss for One Target–Context Pair**
 
 $$L = -\log \sigma\!\big(v(w_t) \cdot c(w_k)\big) - \sum_{i=1}^{K} \log \sigma\!\big(-\,v(w_t) \cdot c(w_i^-)\big)$$
-
 
 **Pros / Cons (1 each)**
 
@@ -546,6 +545,8 @@ $$L = -\log \sigma\!\big(v(w_t) \cdot c(w_k)\big) - \sum_{i=1}^{K} \log \sigma\!
 - **Precision:** reliability of positive predictions.
 - **Recall:** coverage of true positives.
 - **F1:** balance of the two (esp. for imbalanced labels).
+  - Micro: (overall performance) Regular f1 score formula
+  - Macro: (class-balanced performance) Unweighted average of precision, recall, and F1 over all classes (i.e sum of precision, recall, and F1 for each class divided by the number of classes)
 - **+** Capture trade-offs in detection tasks (NER, toxicity).
 - **–** F1 ignores **true negatives** and class-specific priorities.
 
@@ -613,7 +614,12 @@ _(Short, but still with + / –)_
 
 ### **Ambiguity**
 
-- Types: lexical, morphological, POS, syntactic (attachment), word order.
+- Types:
+  - **Lexical:** word sense / polysemy (i.e - bank: financial || river)
+  - **Syntactic:** attachment ambiguity / word order ambiguity (i.e - I saw the man with the telescope.)
+  - **Morphological**: word form / inflection / derivation (i.e - untieable: able to be untied || unable to be tied)
+  - **POS:** part of speech ambiguity (i.e - flies: noun (insects) || verb (he flies))
+  - **Word order:** word order ambiguity (i.e - old men and women.)
 - **Relevance:** WSD, parsing, MT, QA.
 - **+** Central challenge that motivates many NLP tasks.
 - **–** Causes systematic errors if models lack contextual sensitivity.
